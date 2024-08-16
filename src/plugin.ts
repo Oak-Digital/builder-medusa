@@ -1,9 +1,10 @@
 import { CommerceAPIOperations, registerCommercePlugin } from '@builder.io/commerce-plugin-tools';
 import pkg from '../package.json';
-import Medusa, { ProductsResource } from '@medusajs/medusa-js';
+import Medusa from '@medusajs/js-sdk';
 import { Image, Resource } from '@builder.io/commerce-plugin-tools/dist/types/interfaces/resource';
 import { Object } from 'ts-toolbelt';
-import appState from '@builder.io/app-context';
+import { appState } from './app-state';
+import { getDataConfig } from './data-plugin';
 
 console.log('Hello, world!');
 
@@ -41,11 +42,13 @@ registerCommercePlugin({
 }, async (settings) => {
   const medusa = new Medusa({
     baseUrl: settings.get('medusaEndpoint'),
-    maxRetries: 3,
   });
 
-  type MedusaProduct = Awaited<ReturnType<ProductsResource['retrieve']>>['product'];
-  const medusaToBuilderProduct = (medusaProduct: Pick<Object.Required<MedusaProduct, 'id' | 'title'>, 'id' | 'title' | 'images'>) => {
+  const medusaToBuilderProduct = (medusaProduct: {
+    id: string;
+    title: string;
+    images: any[];
+  }) => {
     const medusaImage = medusaProduct.images?.[0];
     const builderImage = (medusaImage ? {
       src: medusaImage.url,
@@ -61,7 +64,7 @@ registerCommercePlugin({
   const service = {
     product: {
       async findById(id: string) {
-        const { product } = await medusa.products.retrieve(id);
+        const { product } = await medusa.store.product.retrieve(id);
         if (!product.id || !product.title) {
           throw new Error(`Product with id: ${id} not found`);
         }
@@ -73,7 +76,7 @@ registerCommercePlugin({
       },
 
       async search(query, offset) {
-        const { hits } = await medusa.products.search({
+        const { hits } = await medusa.store.product.list({
           q: query,
           offset: offset,
         });
@@ -86,15 +89,17 @@ registerCommercePlugin({
         return {
           "@type": "@builder.io/core:Request",
           request: {
-            url: `${appState.config}`
+            url: `${appState.config.apiRoot()}/api/v1/medusa/product/${id}?apiKey=${appState.user.apiKey}`,
           },
           options: {
-
+            product: id,
           }
         }
       }
     },
   } satisfies CommerceAPIOperations;
+
+  appState.registerDataPlugin(getDataConfig(service));
 
   return service;
 });

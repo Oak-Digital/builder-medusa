@@ -3,23 +3,30 @@
   "version": "0.0.0",
   "type": "module",
   "unpkg": "dist/index.cjs",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "files": [
     "dist"
   ],
   "scripts": {
-    "dev": "vite",
+    "dev": "run-p dev:*",
+    "dev:watch": "vite build --watch --mode production",
+    "dev:serve": "serve --cors -l tcp://0.0.0.0:1268 dist",
     "build": "tsc && vite build",
+    "build:rollup": "tsc --module commonjs && rollup -c rollup.config.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
     "@builder.io/commerce-plugin-tools": "^0.3.0",
     "@builder.io/data-plugin-tools": "^0.0.4",
-    "@medusajs/medusa-js": "^6.1.8",
+    "@medusajs/js-sdk": "^0.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@builder.io/app-context": "^1.0.0",
+    "@builder.io/react": "^3.2.7",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
@@ -28,6 +35,8 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "npm-run-all2": "^6.2.2",
+    "serve": "^14.2.3",
     "ts-toolbelt": "^9.6.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"

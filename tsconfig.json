@@ -8,9 +8,11 @@
       "DOM.Iterable"
     ],
     "module": "ESNext",
+    "esModuleInterop": true,
     "skipLibCheck": true,
     /* Bundler mode */
-    "moduleResolution": "bundler",
+    // "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
